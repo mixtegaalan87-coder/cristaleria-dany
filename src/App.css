@@ -1,61 +1,144 @@
-body{
-  margin:0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(135deg,#4f46e5,#9333ea);
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+/* App.css - Versión FINAL con Splash Screen de Puntos */
+
+:root {
+  --azul-dany: #0056b3;
+  --verde-exito: #2e7d32;
+  --rojo-peligro: #d32f2f;
+  --blanco: #ffffff;
+  --gris-fondo: #f0f2f5;
 }
 
-#root{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--gris-fondo);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.contenedor{
-  background:white;
-  padding:40px;
-  border-radius:12px;
-  width:350px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  text-align:center;
+/* --- PANTALLA DE CARGA (LOS 3 PUNTITOS) --- */
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: var(--blanco);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
-h1{
-  margin-bottom:25px;
-  color:#333;
+.splash-content {
+  text-align: center;
 }
 
-button{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
-  transition:0.3s;
+.logo-splash {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
 }
 
-button:nth-child(2){
-  background:#4f46e5;
-  color:white;
+.cargando-puntos {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 
-button:nth-child(3){
-  background:#16a34a;
-  color:white;
+.cargando-puntos span {
+  width: 12px;
+  height: 12px;
+  background-color: var(--azul-dany);
+  border-radius: 50%;
+  display: inline-block;
+  animation: saltar 1.4s infinite ease-in-out both;
 }
 
-button:nth-child(5){
-  background:#f59e0b;
-  color:white;
+.cargando-puntos span:nth-child(1) { animation-delay: -0.32s; }
+.cargando-puntos span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes saltar {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
 }
 
-button:hover{
-  transform:scale(1.05);
-  opacity:0.9;
+/* --- ESTRUCTURA PRINCIPAL --- */
+.barra-azul {
+  background-color: var(--azul-dany);
+  height: 60px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.contenedor {
+  padding: 80px 20px 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 22px;
+  color: #1c1e21;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+/* --- BOTONES Y FORMULARIOS --- */
+button {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background-color: var(--azul-dany);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.1s;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* --- LISTADO DE PRODUCTOS --- */
+.producto-item {
+  background: white;
+  width: 100%;
+  max-width: 350px;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-eliminar-pequeno {
+  background-color: var(--rojo-peligro);
+  width: auto;
+  padding: 8px 12px;
+  font-size: 12px;
+  margin: 0;
 }
