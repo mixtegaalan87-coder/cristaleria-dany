@@ -18,6 +18,8 @@ body {
   padding: 0;
   background-color: var(--gris-fondo);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100dvh;        /* ← también aquí */
+  overflow-x: hidden;        /* ← evita scroll horizontal en móvil */
 }
 
 /* --- SPLASH SCREEN --- */
@@ -81,10 +83,17 @@ body {
 }
 
 /* --- CONTENEDOR Y TÍTULOS --- */
-.contenedor-principal {
-  padding: 90px 20px 40px 20px;
-  display: flex; flex-direction: column; align-items: center;
+
+  .contenedor-principal {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;        /* ← clave en móvil, descuenta la barra del navegador */
+  box-sizing: border-box;
 }
+
 
 .titulo-app {
   font-size: 1.4rem;
