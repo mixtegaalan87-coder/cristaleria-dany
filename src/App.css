@@ -1,4 +1,8 @@
-/* App.css - Versión FINAL con Splash Screen de Puntos */
+/* App.css - Versión FINAL con Splash Screen de Puntos y Ajuste Móvil */
+
+/* App.css - Versión FINAL */
+
+/* App.css - Versión FINAL */
 
 :root {
   --azul-dany: #0056b3;
@@ -6,113 +10,104 @@
   --rojo-peligro: #d32f2f;
   --blanco: #ffffff;
   --gris-fondo: #f0f2f5;
+  --gris-volver: #6c757d;
 }
 
 body {
   margin: 0;
   padding: 0;
   background-color: var(--gris-fondo);
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- PANTALLA DE CARGA (LOS 3 PUNTITOS) --- */
+/* --- SPLASH SCREEN --- */
 .splash-screen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
+  top: 0; left: 0; width: 100%; height: 100vh;
   background-color: var(--blanco);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex; justify-content: center; align-items: center;
   z-index: 2000;
 }
 
-.splash-content {
-  text-align: center;
+.logo-movil {
+  width: 150px;
+  margin-bottom: 25px;
 }
 
-.logo-splash {
-  width: 120px;
-  height: auto;
-  margin-bottom: 20px;
-}
-
-.cargando-puntos {
+.puntos-loading {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.cargando-puntos span {
-  width: 12px;
-  height: 12px;
+.punto {
+  width: 14px; height: 14px;
   background-color: var(--azul-dany);
   border-radius: 50%;
-  display: inline-block;
   animation: saltar 1.4s infinite ease-in-out both;
 }
 
-.cargando-puntos span:nth-child(1) { animation-delay: -0.32s; }
-.cargando-puntos span:nth-child(2) { animation-delay: -0.16s; }
+.punto:nth-child(1) { animation-delay: -0.32s; }
+.punto:nth-child(2) { animation-delay: -0.16s; }
 
 @keyframes saltar {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1.0); }
+  0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+  40% { transform: scale(1.0); opacity: 1; }
 }
 
-/* --- ESTRUCTURA PRINCIPAL --- */
-.barra-azul {
+/* --- BARRA SUPERIOR --- */
+.barra-superior {
   background-color: var(--azul-dany);
   height: 60px;
   width: 100%;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0 20px;
+  box-sizing: border-box;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.contenedor {
-  padding: 80px 20px 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
+.info-sesion {
+  display: flex; align-items: center; gap: 10px; color: white;
 }
 
-h1 {
-  font-size: 22px;
-  color: #1c1e21;
-  margin-bottom: 25px;
-  font-weight: bold;
+.avatar {
+  width: 35px; height: 35px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  border: 1px solid white;
 }
 
-/* --- BOTONES Y FORMULARIOS --- */
-button {
+/* --- CONTENEDOR Y TÍTULOS --- */
+.contenedor-principal {
+  padding: 90px 20px 40px 20px;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.titulo-app {
+  font-size: 1.4rem;
+  color: #222;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.subtitulo { color: #666; margin-bottom: 30px; }
+
+/* --- FORMULARIOS Y BOTONES --- */
+.formulario-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
   width: 100%;
-  max-width: 320px;
-  padding: 14px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 10px;
-  background-color: var(--azul-dany);
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: background 0.2s, transform 0.1s;
+  max-width: 340px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
-button:active {
-  transform: scale(0.98);
-}
-
-input {
+.input-estilo {
   width: 100%;
-  max-width: 320px;
   padding: 12px;
   margin-bottom: 12px;
   border: 1px solid #ddd;
@@ -121,24 +116,56 @@ input {
   box-sizing: border-box;
 }
 
-/* --- LISTADO DE PRODUCTOS --- */
-.producto-item {
-  background: white;
-  width: 100%;
-  max-width: 350px;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+.fila-input {
+  display: flex; gap: 10px; width: 100%;
 }
 
-.btn-eliminar-pequeno {
-  background-color: var(--rojo-peligro);
-  width: auto;
-  padding: 8px 12px;
-  font-size: 12px;
-  margin: 0;
+.fila-input .short { flex: 1; }
+
+button {
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.btn-principal { background-color: var(--azul-dany); color: white; }
+.btn-opcion { background-color: white; color: var(--azul-dany); border: 1px solid var(--azul-dany); }
+.btn-volver-gris { background-color: var(--gris-volver); color: white; }
+.btn-texto { background: none; color: var(--azul-dany); text-decoration: underline; }
+
+.grid-botones {
+  display: flex; flex-direction: column; gap: 10px; width: 100%;
+}
+
+/* --- PANEL DE CÁLCULOS (Actualizado con textos azules) --- */
+.panel-resultados {
+  background-color: #f0f7ff;
+  border-left: 5px solid var(--azul-dany);
+  padding: 12px;
+  width: 100%;
+  margin: 15px 0;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.resultado-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 5px;
+  /* Color azul para las etiquetas (Ganancia Unit, Total, Margen) */
+  color: var(--azul-dany); 
+  font-weight: 500;
+}
+
+.resultado-item span {
+  font-weight: bold;
+  /* El valor numérico sigue siendo verde para indicar éxito/ganancia */
+  color: var(--verde-exito); 
 }
