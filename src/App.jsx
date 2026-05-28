@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import logoDany from "./assets/logo.svg";
-
+import { supabase } from './supabaseClient';
 
 function App() {
   const [etapa, setEtapa] = useState('carga'); 
@@ -9,11 +9,9 @@ function App() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
 
-  // --- NUEVOS ESTADOS PARA REPORTE ---
   const [tipoReporte, setTipoReporte] = useState('dia');
   const [fechaReporte, setFechaReporte] = useState(new Date().toISOString().split('T')[0]);
 
-  // --- MAPEO DE PROVEEDORES Y CATEGORÍAS ---
   const categoriasPorProveedor = {
     "El Gato": ["Productos de plástico para el hogar"],
     "Piquio": ["Loza", "Cristalería"],
@@ -38,6 +36,10 @@ function App() {
   const [pagoRecibido, setPagoRecibido] = useState(0);
   const [notasDevolucion, setNotasDevolucion] = useState('');
 
+  const [nuevoNombre, setNuevoNombre] = useState('');
+  const [nuevaPassword, setNuevaPassword] = useState('');
+  const [nuevoRol, setNuevoRol] = useState('');
+
   useEffect(() => {
     const timerFecha = setInterval(() => {
       const ahora = new Date();
@@ -45,6 +47,22 @@ function App() {
     }, 1000);
     return () => clearInterval(timerFecha);
   }, []);
+useEffect(() => {
+  const cargarInventario = async () => {
+    const { data, error } = await supabase
+      .from('productos')
+      .select('*')
+      .eq('activo', true);
+    if (!error && data) {
+      setInventario(data.map(p => ({
+        ...p,
+        precioVenta: p.precio_venta,
+        precioCompra: p.precio_compra
+      })));
+    }
+  };
+  cargarInventario();
+}, []);
 
   const modificarCantidadVenta = (itemCatalogo, operacion) => {
     const existe = carrito.find(item => item.id === itemCatalogo.id);
@@ -87,31 +105,92 @@ function App() {
     setPagoRecibido(0);
   };
 
-  const intentarEntrar = () => {
-    if (rol && usuario && password) setEtapa('menu');
-    else alert("Por favor, completa todos los campos.");
+  const intentarEntrar = async () => {
+    if (!rol || !usuario || !password) {
+      return alert("Por favor, completa todos los campos.");
+    }
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('nombre', usuario)
+      .eq('contraseña', password)
+      .eq('rol', rol)
+      .single();
+
+    if (error || !data) {
+      alert("Usuario o contraseña incorrectos.");
+    } else {
+      setEtapa('menu');
+    }
   };
 
-  const guardarProducto = () => {
-    if (!producto.nombre || !producto.proveedor || !producto.categoria) {
-      return alert("Por favor, completa Proveedor, Categoría y Nombre.");
-    }
-    setInventario([...inventario, { 
-      ...producto, 
-      cantidad: piezasTotalesCalculadas, 
-      unidad: 'piezas', 
-      id: Date.now() 
-    }]);
-    alert("Producto registrado en el catálogo con éxito.");
+  const guardarProducto = async () => {
+  if (!producto.nombre || !producto.proveedor || !producto.categoria) {
+    return alert("Por favor, completa Proveedor, Categoría y Nombre.");
+  }
+  
+  // ↓ AGREGA AQUÍ
+const guardarUsuario = async () => {
+  if (!nuevoRol || !nuevoNombre || !nuevaPassword) {
+    return alert("Por favor, completa todos los campos.");
+  }
+  const { error } = await supabase
+    .from('usuarios')
+    .insert({ nombre: nuevoNombre, "contraseña": nuevaPassword, rol: nuevoRol });
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Usuario registrado con éxito.");
+    setNuevoNombre('');
+    setNuevaPassword('');
+    setNuevoRol('');
+    setEtapa('menu');
+  }
+};
+
+  // Buscar proveedor
+  const { data: provList } = await supabase
+    .from('proveedores')
+    .select('id')
+    .eq('nombre', producto.proveedor);
+
+  const { data: catList } = await supabase
+    .from('categorias')
+    .select('id')
+    .eq('nombre', producto.categoria.trim());
+
+  if (!provList || provList.length === 0 || !catList || catList.length === 0) {
+    return alert("No se encontró el proveedor o categoría.");
+  }
+
+  const { error } = await supabase
+    .from('productos')
+    .insert({
+      nombre: producto.nombre,
+      proveedor_id: provList[0].id,
+      categoria_id: catList[0].id,
+      cantidad: piezasTotalesCalculadas,
+      stock_min: producto.stockMin,
+      stock_max: producto.stockMax,
+      precio_compra: producto.precioCompra,
+      precio_venta: producto.precioVenta
+    });
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("Producto registrado con éxito.");
     setProducto({
       nombre: '', categoria: '', proveedor: '',
       cantidad: 0, unidad: '1', stockMin: 0, stockMax: 0,
       precioCompra: 0, precioVenta: 0
     });
     setEtapa('menu');
-  };
+  }
+};
+  
 
-  // Función para simular compartir PDF
   const compartirReportePDF = () => {
     alert("Generando archivo PDF del reporte " + tipoReporte + "...");
   };
@@ -204,70 +283,45 @@ function App() {
           </div>
         )}
 
-        {/* --- NUEVA SECCIÓN: REPORTE DE VENTAS (BASADO EN TU IMAGEN) --- */}
         {etapa === 'reporte_ventas' && (
           <div className="seccion-centrada">
             <div className="formulario-card" style={{ padding: '0', backgroundColor: '#fff', minHeight: '500px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ backgroundColor: '#2196F3', color: 'white', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ cursor: 'pointer', fontSize: '20px' }} onClick={() => setEtapa('menu')}>←</span>
                 <span style={{ fontWeight: 'bold' }}>Resumen de Venta</span>
-              
               </div>
-
               <div style={{ padding: '20px' }}>
                 <p style={{ color: '#2196F3', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>Publico en general</p>
-                
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ color: '#080808', fontWeight: 'bold', display: 'block', fontSize: '14px' }}>Fecha</label>
-                    <select 
-                      className="input-estilo" 
-                      style={{ fontSize: '12px', padding: '5px' }}
-                      value={tipoReporte}
-                      onChange={(e) => setTipoReporte(e.target.value)}
-                    >
-                      <option value="dia">Día </option>
+                    <select className="input-estilo" style={{ fontSize: '12px', padding: '5px' }} value={tipoReporte} onChange={(e) => setTipoReporte(e.target.value)}>
+                      <option value="dia">Día</option>
                       <option value="semana">Esta Semana</option>
                       <option value="mes">Este Mes</option>
                       <option value="anual">Anual</option>
                     </select>
                     {tipoReporte === 'dia' && (
-                      <input 
-                        type="date" 
-                        className="input-estilo" 
-                        style={{ marginTop: '5px', fontSize: '12px' }}
-                        value={fechaReporte}
-                        onChange={(e) => setFechaReporte(e.target.value)}
-                      />
+                      <input type="date" className="input-estilo" style={{ marginTop: '5px', fontSize: '12px' }} value={fechaReporte} onChange={(e) => setFechaReporte(e.target.value)} />
                     )}
                   </div>
                   <div style={{ flex: 1, textAlign: 'right' }}>
                     <label style={{ color: '#080808', fontWeight: 'bold', display: 'block', fontSize: '14px' }}>Artículos</label>
-
                     <p style={{ color: '#080808', margin: 0 }}>0</p>
                   </div>
                 </div>
-
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #444141', paddingBottom: '5px' }}>
                   <span style={{ color: '#080808', fontWeight: 'bold' }}>Productos</span>
                   <span style={{ color: '#080808', fontWeight: 'bold' }}>Cantidad</span>
                 </div>
-                
                 <div style={{ minHeight: '200px', textAlign: 'left', paddingTop: '10px' }}>
                   <p style={{ color: '#2196F3', fontSize: '14px', fontWeight: 'bold' }}>Precio:</p>
-                  {/* Aquí iría el mapeo de productos vendidos */}
                   <p style={{ textAlign: 'center', color: '#ccc', marginTop: '50px' }}>No hay datos para este periodo</p>
                 </div>
-
                 <div style={{ marginTop: 'auto', borderTop: '2px solid #2b2929', paddingTop: '10px', textAlign: 'center' }}>
                   <h3 style={{ color: '#232441', margin: 0 }}>Total: $0.00</h3>
                 </div>
-
-                <button 
-                  className="btn-principal" 
-                  style={{ marginTop: '30px', backgroundColor: 'white', color: '#2196F3', border: '1px solid #2196F3', borderRadius: '25px' }}
-                  onClick={compartirReportePDF}
-                >
+                <button className="btn-principal" style={{ marginTop: '30px', backgroundColor: 'white', color: '#2196F3', border: '1px solid #2196F3', borderRadius: '25px' }} onClick={compartirReportePDF}>
                   COMPARTIR (PDF)
                 </button>
               </div>
@@ -276,7 +330,6 @@ function App() {
           </div>
         )}
 
-        {/* --- LOS DEMÁS APARTADOS SE MANTIENEN IGUAL --- */}
         {etapa === 'catalogo' && (
           <div className="seccion-centrada">
             {rol === 'Administrador' ? (
@@ -321,7 +374,7 @@ function App() {
               </div>
             ) : (
               <div className="formulario-card" style={{ padding: '0', overflow: 'hidden' }}>
-                <h3 style={{ background: '#003366', color: 'white', margin: '0', padding: '15px', textAlign: 'center' }}> Catálogo de Productos</h3>
+                <h3 style={{ background: '#003366', color: 'white', margin: '0', padding: '15px', textAlign: 'center' }}>Catálogo de Productos</h3>
                 <div style={{ padding: '20px' }}>
                   {inventario.length === 0 ? (
                     <div style={{ background: '#fff3e0', color: '#e65100', padding: '20px', borderRadius: '8px', border: '1px dashed #ffb74d', textAlign: 'center' }}>
@@ -448,14 +501,21 @@ function App() {
         )}
 
         {etapa === 'registro_admin' && (
-            <div className="formulario-card seccion-centrada">
-              <h3 style={{ color: '#003366' }}>Alta de Nuevo Personal</h3>
-              <input className="input-estilo" type="text" placeholder="Nombre de Usuario" />
-              <input className="input-estilo" type="password" placeholder="Contraseña de acceso" />
-              <button className="btn-principal" onClick={() => setEtapa('menu')}>Guardar Usuario</button>
-              <button className="btn-texto" onClick={() => setEtapa('menu')}>Volver</button>
-            </div>
+           <div className="formulario-card seccion-centrada">
+             <h3 style={{ color: '#003366' }}>Alta de Nuevo Personal</h3>
+             <label className="etiqueta-dibujo">Tipo de acceso</label>         {/* ← NUEVO */}
+             <select className="input-estilo">                                   {/* ← NUEVO */}
+               <option value="">-- Seleccionar Rol --</option>                   {/* ← NUEVO */}
+               <option value="Administrador">Administrador</option>              {/* ← NUEVO */}
+               <option value="Empleado">Empleado</option>                        {/* ← NUEVO */}
+             </select>                                                           {/* ← NUEVO */}
+               <input className="input-estilo" type="text" placeholder="Nombre de Usuario" />
+                <input className="input-estilo" type="password" placeholder="Contraseña de acceso" />
+               <button className="btn-principal" onClick={() => setEtapa('menu')}>Guardar Usuario</button>
+               <button className="btn-texto" onClick={() => setEtapa('menu')}>Volver</button>
+              </div>
         )}
+
       </div>
     </div>
   );
