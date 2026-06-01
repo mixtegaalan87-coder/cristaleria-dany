@@ -195,3 +195,51 @@ button {
   /* El valor numérico sigue siendo verde para indicar éxito/ganancia */
   color: var(--verde-exito); 
 }
+
+/* ── ADAPTACIÓN MÓVIL ── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Evita zoom automático en iOS al enfocar inputs */
+.input-estilo {
+  font-size: 16px;
+}
+
+/* Evita zoom al rotar pantalla en iOS */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Evita que iOS deforme los botones */
+button {
+  -webkit-appearance: none;
+}
+
+/* Título responsive */
+.titulo-app {
+  font-size: clamp(1rem, 4vw, 1.4rem);
+}
+
+/* El contenedor no centre verticalmente cuando hay header */
+.barra-superior ~ .contenedor-principal {
+  justify-content: flex-start;
+  padding-top: 80px;
+  min-height: unset;
+}
+
+/* Padding inferior para que nada quede cortado */
+.contenedor-principal {
+  padding-bottom: 40px;
+}
+
+/* Evita desbordamiento horizontal en cualquier celular */
+.formulario-card {
+  max-width: 100%;
+}
+
+.seccion-centrada {
+  max-width: 100%;
+  padding: 0 4px;
+}
